@@ -1,5 +1,7 @@
 package net.sussyit.redpandamod;
 
+import net.sussyit.redpandamod.block.ModBlocks;
+import net.sussyit.redpandamod.item.ModItems;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
@@ -54,6 +56,9 @@ public class RedPandaMod {
         // Do not add this line if there are no @SubscribeEvent-annotated functions in this class, like onServerStarting() below.
         NeoForge.EVENT_BUS.register(this);
 
+        ModItems.register(modEventBus);
+        ModBlocks.register(modEventBus);
+
         // Register the item to a creative tab
         modEventBus.addListener(this::addCreative);
 
@@ -67,7 +72,14 @@ public class RedPandaMod {
 
     // Add the example block item to the building blocks tab
     private void addCreative(BuildCreativeModeTabContentsEvent event) {
-
+        if(event.getTabKey() == CreativeModeTabs.INGREDIENTS) {
+            event.accept(ModItems.RED_PANDA_TREAT);
+        }
+        if(event.getTabKey() == CreativeModeTabs.BUILDING_BLOCKS) {
+            event.accept(ModBlocks.DANIEL_CHUNG);
+            event.accept(ModBlocks.DANIEL);
+            event.accept(ModBlocks.KYLE);
+        }
     }
 
     // You can use SubscribeEvent and let the Event Bus discover methods to call

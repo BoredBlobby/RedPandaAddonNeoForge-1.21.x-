@@ -1,36 +1,37 @@
-# eclipse
-bin
+# Eclipse
+bin/
 *.launch
-.settings
-.metadata
+.settings/
+.metadata/
 .classpath
 .project
 
-# idea
-out
+# IntelliJ IDEA
+out/
 *.ipr
 *.iws
 *.iml
-.idea
+.idea/
 
-# gradle
-build
-.gradle
-
+# Gradle
 build/
+.gradle/
+
+# Minecraft run directories
 run/
-# additional NeoForge / modding directories
-out/
+runs/
+run-data/
+
+# NeoForge / modding directories
 classes/
 logs/
+
+# Keep your published mod jars, ignore everything else
+*.jar
 !build/libs/*.jar
 
+# Datagen outputs
+src/generated/resources/
 
-
-# other
-eclipse
-run
-runs
-run-data
-
-repo
+# Local repo cache
+repo/

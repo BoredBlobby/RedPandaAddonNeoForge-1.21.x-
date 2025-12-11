@@ -1,11 +1,11 @@
 package net.sussyit.redpandamod.datgen;
 
-import com.jcraft.jorbis.Block;
+import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.loot.BlockLootSubProvider;
-import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.flag.FeatureFlags;
-import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
+import net.sussyit.redpandamod.block.ModBlocks;
 
 import java.util.Set;
 
@@ -16,10 +16,13 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
 
     @Override
     protected void generate() {
-
+        dropSelf(ModBlocks.KYLE.get());
+        dropSelf(ModBlocks.DANIEL_CHUNG.get());
+        dropSelf(ModBlocks.DANIEL.get());
     }
 
-    //@Override
-    //protected Iterable<Block> getKnownBlocks() {
-    //}
+    @Override
+    protected Iterable<Block> getKnownBlocks() {
+        return ModBlocks.BLOCKS.getEntries().stream().map(Holder::value)::iterator;
+    }
 }

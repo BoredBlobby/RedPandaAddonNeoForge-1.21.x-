@@ -17,6 +17,16 @@ out
 build
 .gradle
 
+build/
+run/
+# additional NeoForge / modding directories
+out/
+classes/
+logs/
+!build/libs/*.jar
+
+
+
 # other
 eclipse
 run

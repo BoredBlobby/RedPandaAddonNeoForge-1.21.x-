@@ -1,7 +1,9 @@
 package net.sussyit.redpandamod;
 
+import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.sussyit.redpandamod.block.ModBlocks;
 import net.sussyit.redpandamod.entity.ModEntities;
+import net.sussyit.redpandamod.entity.client.PiglinBossRenderer;
 import net.sussyit.redpandamod.item.ModCreativeModeTabs;
 import net.sussyit.redpandamod.item.ModItems;
 import org.slf4j.Logger;
@@ -84,7 +86,7 @@ public class RedPandaMod {
     static class ClientModEvents {
         @SubscribeEvent
         static void onClientSetup(FMLClientSetupEvent event) {
-
+            EntityRenderers.register(ModEntities.PIGLINBOSS.get(), PiglinBossRenderer::new);
         }
     }
 }

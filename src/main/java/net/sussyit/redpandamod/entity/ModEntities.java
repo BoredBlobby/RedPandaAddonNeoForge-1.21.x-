@@ -16,7 +16,7 @@ public class ModEntities {
 
     public static final Supplier<EntityType<PiglinBossEntity>> PIGLINBOSS =
             ENTITY_TYPES.register("piglinboss", () -> EntityType.Builder.of(PiglinBossEntity::new, MobCategory.CREATURE)
-                    .sized(16f, 18f).build("piglingboss"));
+                    .sized(2f, 1.5f).build("piglingboss"));
 
     public static void register(IEventBus eventBus) {
         ENTITY_TYPES.register(eventBus);

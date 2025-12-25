@@ -28,7 +28,6 @@ public class PiglinBossModel<T extends PiglinBossEntity> extends HierarchicalMod
     public static LayerDefinition createBodyLayer() {
         MeshDefinition meshdefinition = new MeshDefinition();
         PartDefinition partdefinition = meshdefinition.getRoot();
-
         PartDefinition root = partdefinition.addOrReplaceChild("root", CubeListBuilder.create(), PartPose.offset(0.0F, 24.0F, 0.0F));
 
         PartDefinition body = root.addOrReplaceChild("body", CubeListBuilder.create().texOffs(0, 0).addBox(-8.0F, -5.0F, -8.0F, 16.0F, 24.0F, 16.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 5.0F, 0.0F));
@@ -41,6 +40,8 @@ public class PiglinBossModel<T extends PiglinBossEntity> extends HierarchicalMod
         this.root().getAllParts().forEach(ModelPart::resetPose);
 
         this.animate(entity.deathAnimationState, PiglinBossAnimations.ANIM_DEATH, ageInTicks, 1f);
+        this.animate(entity.sleepAnimationState, PiglinBossAnimations.ANIM_SLEEP, ageInTicks, 1f);
+        this.animate(entity.awakeningAnimationState, PiglinBossAnimations.ANIM_AWAKENING, ageInTicks, 1f);
     }
 
     @Override

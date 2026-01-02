@@ -9,18 +9,24 @@ import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.BossEvent;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.sussyit.redpandamod.entity.client.FireShieldAttack;
+import net.sussyit.redpandamod.entity.client.IBossAttack;
 import net.sussyit.redpandamod.util.CameraShakeUtils;
 
 public class PiglinBossEntity extends LivingEntity {
     public final AnimationState deathAnimationState = new AnimationState();
     public final AnimationState sleepAnimationState = new AnimationState();
     public final AnimationState awakeningAnimationState = new AnimationState();
+    public final AnimationState attackFireShieldAnimationState = new AnimationState();
+    public final AnimationState attackShieldSpinAnimationState = new AnimationState();
+    public final AnimationState attackEarthQuakeAnimationState = new AnimationState();
 
     private final ServerBossEvent bossEvent =
             new ServerBossEvent(Component.literal("Piglin Boss"), BossEvent.BossBarColor.RED, BossEvent.BossBarOverlay.NOTCHED_10);
@@ -87,7 +93,7 @@ public class PiglinBossEntity extends LivingEntity {
 
     /* States */
     // EntityDataAccessor: type of the "key" that unlocks an Integer calue inside an enityt's data folder
-    //PiglinBossEneity.class tells the game which entity this dat belongs to
+    //PiglinBossEneity.class tells the game which entity this data belongs to
     //EnetiyDatSerializer.INT tells the game how to turn this data into "bits to sent it over th eintenert
     /* Stores all the current states of the mob into a folder that can be called later on for client side */
     private static final EntityDataAccessor<Integer> BOSS_STATE =
@@ -96,6 +102,7 @@ public class PiglinBossEntity extends LivingEntity {
     public static final int SLEEPING = 0;
     public static final int AWAKENING = 1; // Playing the "wake up" animation
     public static final int FIGHTING = 2;
+    public static final int DEATH = 3;
 
     /* Persistent data versus One-Time Signals: The game needs to remmebr what the boss was doing */
     @Override
@@ -103,11 +110,16 @@ public class PiglinBossEntity extends LivingEntity {
         super.defineSynchedData(builder);
         // This initializes the state so the game knows it exists
         builder.define(BOSS_STATE, SLEEPING);
+        builder.define(BOSS_PHASE, PHASE_1);
+        builder.define(CURRENT_ATTACK, ATTACK_NONE);
     }
 
     /*Checks the distance tot eh player every second */
 
     private int sleepTimer = 0; // Internal timer for the 10-second rule
+
+    private IBossAttack activeAttack = null;
+    private int attackCooldown = 0;
 
     @Override
     public void aiStep() {
@@ -131,6 +143,28 @@ public class PiglinBossEntity extends LivingEntity {
                     this.sleepTimer = 0; //BE AWARE: using sleep timer; careful of interference
                 }
             }
+            /* Attack mode START */
+            else if (state == FIGHTING && nearestPlayerLeave != null) {
+                if (this.activeAttack != null) {
+                    this.activeAttack.tick(this);
+
+                    if (this.activeAttack.isFinished()) {
+                        this.activeAttack.stop(this);
+                        this.activeAttack = null;
+                        this.setAttackState(ATTACK_NONE); // Reset animation
+                        this.attackCooldown = 60; // 3 seconds rest between attacks
+                    }
+                    return; // Don't do anything else while attacking
+                }
+
+                // 2. Logic to choose a new attack (if cooldown is over)
+                if (this.attackCooldown > 0) {
+                    this.attackCooldown--;
+                } else {
+                    startNewAttack();
+                }
+            }
+            /*Attack mode END */
             else if (state == FIGHTING && nearestPlayerLeave == null) {
                 // Player left range: Start health regen and timer
                 this.setHealth(this.getHealth() + 0.1f); // Slow regen
@@ -159,6 +193,12 @@ public class PiglinBossEntity extends LivingEntity {
             } else if (state == AWAKENING) {
                 this.sleepAnimationState.stop();
                 this.awakeningAnimationState.startIfStopped(this.tickCount);
+            } else if (state == FIGHTING) {
+                int attackID = this.entityData.get(CURRENT_ATTACK);
+                if(attackID == ATTACK_FIRE_SHIELD) {
+                    this.attackFireShieldAnimationState.startIfStopped(this.tickCount);
+                    this.attackFireShieldAnimationState.stop();
+                }
             }
         }
     }
@@ -167,7 +207,7 @@ public class PiglinBossEntity extends LivingEntity {
     // 1. TRIGGER: Start the animation when the Client knows the mob is dead.
     @Override
     public void handleEntityEvent(byte id) { //Clientside
-        if (id == 3) { // '3' is the internal Minecraft ID for "Entity Died"
+        if (id == 72) { // '3' is the internal Minecraft ID for "play hurt/death animation"
             // We use 'this.tickCount' as the start time
             this.deathAnimationState.start(this.tickCount);
         }
@@ -191,9 +231,74 @@ public class PiglinBossEntity extends LivingEntity {
 
         // Example: If your animation is 3 seconds long (60 ticks), change 20 to 60.
         // The default Minecraft death time is 20 ticks (1 second).
-        if (this.deathTime == 60 && !this.level().isClientSide()) {
+        if (this.deathTime == 500 && !this.level().isClientSide()) {
             this.remove(RemovalReason.KILLED);
             this.dropExperience(PiglinBossEntity.this);
         }
+    }
+
+    /* Boss Phases */
+
+    //Stored data for the mob into a certain folder that can be called back later
+    // 1. The phases(1, 2, 3)
+    private static final EntityDataAccessor<Integer> BOSS_PHASE =
+            SynchedEntityData.defineId(PiglinBossEntity.class, EntityDataSerializers.INT);
+
+    public static final int PHASE_1 = 1;
+    public static final int PHASE_2 = 2;
+    public static final int PHASE_3 = 3;
+
+    //2. Specific attacks(1-9)
+    private static final EntityDataAccessor<Integer> CURRENT_ATTACK =
+            SynchedEntityData.defineId(PiglinBossEntity.class, EntityDataSerializers.INT);
+
+    public static final int ATTACK_FIRE_SHIELD = 0;
+    public static final int ATTACK_SHIELD_SPIN = 1;
+    public static final int ATTACK_EARTHQUAKE = 2;
+
+    public static final int ATTACK_SHADOW_VOID = 3;
+    public static final int ATTACK_VOID_CALL = 4;
+    public static final int ATTACK_SHIELD_BUBBLE = 5;
+
+    public static final int ATTACK_UKNOWN6 = 6;
+    public static final int ATTACK_UKNOWN7 = 7;
+    public static final int ATTACK_UKNOWN8 = 8;
+
+    public static final int ATTACK_NONE = 9;
+
+    public void setAttackState(int currAttack) {
+        this.entityData.set(CURRENT_ATTACK, currAttack);
+    }
+
+    private void startNewAttack() {
+        int phase = this.entityData.get(BOSS_PHASE);
+
+        // Pick an attack based on the current phase
+        if (phase == PHASE_1) {
+            // Randomly pick between Phase 1 attacks
+            if (this.random.nextBoolean()) {
+                this.activeAttack = new FireShieldAttack();
+            } else {
+                // need to add attack
+            }
+        }
+        else if (phase == PHASE_2) {
+            // Phase 2 logic...
+        }
+
+        // Start the chosen attack
+        if (this.activeAttack != null) {
+            this.activeAttack.start(this);
+        }
+    }
+
+    @Override //Prevents any attacks during death animation
+    public void die(DamageSource source) {
+        int state = this.entityData.get(BOSS_STATE);
+        if (state == DEATH) return;
+
+        this.entityData.set(BOSS_STATE, DEATH);
+
+        this.level().broadcastEntityEvent(this, (byte) 72);
     }
 }

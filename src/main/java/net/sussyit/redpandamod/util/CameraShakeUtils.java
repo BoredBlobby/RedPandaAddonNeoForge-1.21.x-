@@ -6,11 +6,13 @@ import net.minecraft.util.Mth;
 public class CameraShakeUtils {
     private static float shakeIntensity = 0f;
     private static int shakeDuration = 0;
+    private static boolean shouldFreeze = false;
 
     // Call this from handleEntityEvent
-    public static void shake(int duration, float intensity) {
+    public static void shake(int duration, float intensity, boolean freeze) {
         shakeDuration = duration;
         shakeIntensity = intensity;
+        shouldFreeze = freeze;
     }
 
     // This needs to be called every frame (RenderGuiEvent or similar)
@@ -24,6 +26,14 @@ public class CameraShakeUtils {
             mc.player.setYRot(mc.player.getYRot() + randomY);
 
             shakeDuration--;
+
+            if(shakeDuration <= 0) {
+                shouldFreeze = false;
+            }
         }
+    }
+
+    public static boolean isPlayerFrozen() {
+        return shouldFreeze;
     }
 }

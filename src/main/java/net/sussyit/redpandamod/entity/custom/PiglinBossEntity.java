@@ -1,10 +1,14 @@
 package net.sussyit.redpandamod.entity.custom;
 
 import net.minecraft.core.NonNullList;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerBossEvent;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.BossEvent;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -17,6 +21,9 @@ public class PiglinBossEntity extends LivingEntity {
     public final AnimationState deathAnimationState = new AnimationState();
     public final AnimationState sleepAnimationState = new AnimationState();
     public final AnimationState awakeningAnimationState = new AnimationState();
+
+    private final ServerBossEvent bossEvent =
+            new ServerBossEvent(Component.literal("Piglin Boss"), BossEvent.BossBarColor.RED, BossEvent.BossBarOverlay.NOTCHED_10);
 
     private final NonNullList<ItemStack> handStacks = NonNullList.withSize(2, ItemStack.EMPTY); // Mainhand and offhand
     private final NonNullList<ItemStack> armorStacks = NonNullList.withSize(4, ItemStack.EMPTY); // 4 pieces of armor
@@ -63,6 +70,21 @@ public class PiglinBossEntity extends LivingEntity {
         return HumanoidArm.RIGHT;
     }
 
+    /* Boss Bar */
+
+    @Override
+    public void startSeenByPlayer(ServerPlayer serverPlayer) {
+        super.startSeenByPlayer(serverPlayer);
+        this.bossEvent.addPlayer(serverPlayer);
+    }
+
+    @Override
+    public void stopSeenByPlayer(ServerPlayer serverPlayer) {
+        super.stopSeenByPlayer(serverPlayer);
+        this.bossEvent.removePlayer(serverPlayer);
+    }
+
+
     /* States */
     // EntityDataAccessor: type of the "key" that unlocks an Integer calue inside an enityt's data folder
     //PiglinBossEneity.class tells the game which entity this dat belongs to
@@ -90,9 +112,10 @@ public class PiglinBossEntity extends LivingEntity {
     @Override
     public void aiStep() {
         super.aiStep();
-
+        this.bossEvent.setProgress(this.getHealth() / this.getMaxHealth()); //boss health bar
         if (!this.level().isClientSide()) { // server side
             Player nearestPlayer = this.level().getNearestPlayer(this, 15.0D); // 15 block detection
+            Player nearestPlayerLeave = this.level().getNearestPlayer(this, 30.0D); // 30 block detection
 
             int state = this.entityData.get(BOSS_STATE); // gets the integer
 
@@ -108,7 +131,7 @@ public class PiglinBossEntity extends LivingEntity {
                     this.sleepTimer = 0; //BE AWARE: using sleep timer; careful of interference
                 }
             }
-            else if (state == FIGHTING && nearestPlayer == null) {
+            else if (state == FIGHTING && nearestPlayerLeave == null) {
                 // Player left range: Start health regen and timer
                 this.setHealth(this.getHealth() + 0.1f); // Slow regen
                 this.sleepTimer++;
@@ -117,7 +140,7 @@ public class PiglinBossEntity extends LivingEntity {
                     this.entityData.set(BOSS_STATE, SLEEPING);
                 }
             }
-            else if (nearestPlayer != null) {
+            else if (nearestPlayerLeave != null) {
                 this.sleepTimer = 0; // Reset timer if player comes back
             }
         }
@@ -154,7 +177,7 @@ public class PiglinBossEntity extends LivingEntity {
                     SoundEvents.ENDER_DRAGON_GROWL, this.getSoundSource(), 1.0f, 0.8f, false);
 
             // 2. Trigger Screen Shake (Example using vanilla particles or a mod's API)
-            cameraShakeUtils.shake(100, 2f);
+            cameraShakeUtils.shake(70, 1f, true);
         } else {
             super.handleEntityEvent(id);
         }

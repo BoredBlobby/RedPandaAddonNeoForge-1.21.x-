@@ -4,12 +4,14 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.sussyit.redpandamod.util.CameraShakeUtils;
 
 public class PiglinBossEntity extends LivingEntity {
     public final AnimationState deathAnimationState = new AnimationState();
@@ -18,6 +20,8 @@ public class PiglinBossEntity extends LivingEntity {
 
     private final NonNullList<ItemStack> handStacks = NonNullList.withSize(2, ItemStack.EMPTY); // Mainhand and offhand
     private final NonNullList<ItemStack> armorStacks = NonNullList.withSize(4, ItemStack.EMPTY); // 4 pieces of armor
+
+    private final CameraShakeUtils cameraShakeUtils = new CameraShakeUtils();
 
     public PiglinBossEntity(EntityType<? extends LivingEntity> entityType, Level level) {
         super(entityType, level);
@@ -95,12 +99,13 @@ public class PiglinBossEntity extends LivingEntity {
             if (state == SLEEPING && nearestPlayer != null) { // if state is SLEEPING and there is a player
                 this.entityData.set(BOSS_STATE, AWAKENING); //set to awakening
                 this.sleepTimer = 0;
+                this.level().broadcastEntityEvent(this, (byte) 64); // trigger roar(server side)
             }
             else if(state == AWAKENING) {
                 this.sleepTimer++;
                 if (this.sleepTimer >= 100) {
                     this.entityData.set(BOSS_STATE, FIGHTING);
-                    this.sleepTimer = 0;
+                    this.sleepTimer = 0; //BE AWARE: using sleep timer; careful of interference
                 }
             }
             else if (state == FIGHTING && nearestPlayer == null) {
@@ -120,6 +125,7 @@ public class PiglinBossEntity extends LivingEntity {
 
     @Override
     public void tick() {
+
         super.tick();
         if (this.level().isClientSide()) {
             int state = this.entityData.get(BOSS_STATE);
@@ -137,12 +143,21 @@ public class PiglinBossEntity extends LivingEntity {
     /* Animations */
     // 1. TRIGGER: Start the animation when the Client knows the mob is dead.
     @Override
-    public void handleEntityEvent(byte id) {
+    public void handleEntityEvent(byte id) { //Clientside
         if (id == 3) { // '3' is the internal Minecraft ID for "Entity Died"
             // We use 'this.tickCount' as the start time
             this.deathAnimationState.start(this.tickCount);
         }
-        super.handleEntityEvent(id);
+        else if (id == 64) {
+            // 1. Play the Roar Sound
+            this.level().playLocalSound(this.getX(), this.getY(), this.getZ(),
+                    SoundEvents.ENDER_DRAGON_GROWL, this.getSoundSource(), 1.0f, 0.8f, false);
+
+            // 2. Trigger Screen Shake (Example using vanilla particles or a mod's API)
+            cameraShakeUtils.shake(100, 2f);
+        } else {
+            super.handleEntityEvent(id);
+        }
     }
 
     // 2. DURATION: Keep the body in the world long enough for the animation to finish.

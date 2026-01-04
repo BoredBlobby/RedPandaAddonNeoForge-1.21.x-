@@ -194,10 +194,12 @@ public class PiglinBossEntity extends LivingEntity {
                 this.sleepAnimationState.stop();
                 this.awakeningAnimationState.startIfStopped(this.tickCount);
             } else if (state == FIGHTING) {
+                this.awakeningAnimationState.stop();
                 int attackID = this.entityData.get(CURRENT_ATTACK);
                 if(attackID == ATTACK_FIRE_SHIELD) {
                     this.attackFireShieldAnimationState.startIfStopped(this.tickCount);
-                    this.attackFireShieldAnimationState.stop();
+                } else {
+                    this.attackFireShieldAnimationState.stop(); // stops if we are not doing an attack
                 }
             }
         }
@@ -231,7 +233,8 @@ public class PiglinBossEntity extends LivingEntity {
 
         // Example: If your animation is 3 seconds long (60 ticks), change 20 to 60.
         // The default Minecraft death time is 20 ticks (1 second).
-        if (this.deathTime == 500 && !this.level().isClientSide()) {
+        if (this.deathTime == 60 && !this.level().isClientSide()) {
+            super.die(this.damageSources().generic());
             this.remove(RemovalReason.KILLED);
             this.dropExperience(PiglinBossEntity.this);
         }

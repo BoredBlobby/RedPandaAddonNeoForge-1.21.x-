@@ -13,16 +13,16 @@ public class FireShieldAttack implements IBossAttack{
 
     @Override
     public void start(PiglinBossEntity boss) {
-        this.timer = 0;
         boss.attackFireShieldAnimationState.start(boss.tickCount);
         boss.setAttackState(PiglinBossEntity.ATTACK_FIRE_SHIELD);
+        this.timer = 0;
     }
 
     @Override
     public void tick(PiglinBossEntity boss) {
         timer++;
 
-        if(timer == 100) {
+        if(timer == 120) {
             if (!boss.level().isClientSide()) { // CRITICAL: Only deal damage on Server side!
 
                 // 1. Define the range (5 blocks radius)
@@ -43,7 +43,7 @@ public class FireShieldAttack implements IBossAttack{
             }
 
             // Logic to shake screen (Client side visual, can be outside the check or handled via event)
-            CameraShakeUtils.shake(20, 0.5f, false);
+            CameraShakeUtils.shake(20, 2f, false);
         }
     }
 

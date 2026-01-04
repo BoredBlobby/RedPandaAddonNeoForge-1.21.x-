@@ -24,7 +24,7 @@ public class PiglinBossAnimations {
             ))
             .build();
 
-    public static final AnimationDefinition ANIM_SLEEP = AnimationDefinition.Builder.withLength(2.0417F)
+    public static final AnimationDefinition ANIM_SLEEP = AnimationDefinition.Builder.withLength(2.0417F).looping()
             .addAnimation("root", new AnimationChannel(AnimationChannel.Targets.ROTATION,
                     new Keyframe(0.0F, KeyframeAnimations.degreeVec(90.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR),
                     new Keyframe(2.0417F, KeyframeAnimations.degreeVec(90.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR)

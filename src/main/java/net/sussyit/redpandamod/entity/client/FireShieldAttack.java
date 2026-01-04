@@ -19,7 +19,7 @@ public class FireShieldAttack implements IBossAttack{
 
     private final int WARNING_DURATION = 120; // 2 seconds of warning
     private final int ATTACK_DURATION = 20;  // Total time
-    private final int RAY_LENGTH = 12;       // How far the lines go
+    private final int RAY_LENGTH = 30;       // How far the lines go
     private final int RAY_COUNT = 8;         // 8 Rays = Asterisk shape (*)
 
 
@@ -31,7 +31,7 @@ public class FireShieldAttack implements IBossAttack{
         this.timer = 0;
         // --- TARGETING LOGIC ---
         // Find the nearest player within 16 blocks to aim at
-        Player target = boss.level().getNearestPlayer(boss, 16.0D);
+        Player target = boss.level().getNearestPlayer(boss, 30.00D);
         if (target != null) {
             double dx = target.getX() - boss.getX();
             double dz = target.getZ() - boss.getZ();
@@ -47,8 +47,8 @@ public class FireShieldAttack implements IBossAttack{
         timer++;
 
         // PHASE 1: TELEGRAPH (Warning Lines)
-        if (timer < WARNING_DURATION) {
-            spawnAsteriskParticles(boss, 0.5f); // Weak smoke
+        if (timer < WARNING_DURATION && timer % 10 == 0) {
+            spawnAsteriskParticles(boss, 1f); // Weak smoke
         }
 
         // PHASE 2: DETONATION (The Hit)
@@ -97,7 +97,7 @@ public class FireShieldAttack implements IBossAttack{
 
         ServerLevel level = (ServerLevel) boss.level();
         Vec3 center = boss.position();
-        double stepSize = 2;
+        double stepSize = 3;
 
         // How far to the left and right the "extra" lines should be
         double beamWidthOffset = 0.6;
@@ -163,12 +163,12 @@ public class FireShieldAttack implements IBossAttack{
                 double x = center.x + (dirX * r);
                 double y = center.y + 0.2;
                 double z = center.z + (dirZ * r);
-                for (float widthOffset = -0.4f; widthOffset <= 0.4f; widthOffset += 0.8f) {
+                for (float widthOffset = -1.0f; widthOffset <= 1.0f; widthOffset += 0.5f) {
                     double px = x + (perpX * widthOffset);
                     double pz = z + (perpZ * widthOffset);
 
                     // Use 'redDust' here instead of ParticleTypes.SMOKE
-                    level.sendParticles(redDust, x, y, z, 1, 0.2, 0, 0.2, 0.0);
+                    level.sendParticles(redDust, px, y, pz, 1, 0.2, 0, 0.2, 0.0);
                 }
             }
         }
@@ -182,7 +182,7 @@ public class FireShieldAttack implements IBossAttack{
 
         Vec3 center = boss.position();
         double angleStep = 360.0 / RAY_COUNT;
-        double hitboxWidth = 2.0; // How wide the "fire" is
+        double hitboxWidth = 1.5; // How wide the "fire" is
 
         // We scan for players in the entire area first to save performance
         AABB giantBox = boss.getBoundingBox().inflate(RAY_LENGTH);

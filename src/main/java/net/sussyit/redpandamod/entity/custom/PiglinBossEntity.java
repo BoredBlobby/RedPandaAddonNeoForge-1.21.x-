@@ -18,6 +18,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.sussyit.redpandamod.entity.client.FireShieldAttack;
 import net.sussyit.redpandamod.entity.client.IBossAttack;
+import net.sussyit.redpandamod.entity.client.ShieldSpinAttack;
 import net.sussyit.redpandamod.util.CameraShakeUtils;
 
 public class PiglinBossEntity extends LivingEntity {
@@ -38,15 +39,27 @@ public class PiglinBossEntity extends LivingEntity {
 
     public PiglinBossEntity(EntityType<? extends LivingEntity> entityType, Level level) {
         super(entityType, level);
+        this.setHealth(this.getMaxHealth()); // Ensures it starts at 300
     }
 
 
     public static AttributeSupplier.Builder createAttributes() {
         return LivingEntity.createLivingAttributes()
-                .add(Attributes.MAX_HEALTH, 30D)
+                .add(Attributes.MAX_HEALTH, 300D)
                 .add(Attributes.MOVEMENT_SPEED, 0.35D)
+                .add(Attributes.KNOCKBACK_RESISTANCE, 1.0D)
                 .add(Attributes.FOLLOW_RANGE, 24D);
 
+    }
+
+    @Override
+    public void knockback(double strength, double x, double z) {
+        //prevents any knockback
+    }
+
+    @Override
+    public void push(double x, double y, double z) {
+        //prevents any push
     }
 
     @Override
@@ -127,7 +140,7 @@ public class PiglinBossEntity extends LivingEntity {
         this.bossEvent.setProgress(this.getHealth() / this.getMaxHealth()); //boss health bar
         if (!this.level().isClientSide()) { // server side
             Player nearestPlayer = this.level().getNearestPlayer(this, 15.0D); // 15 block detection
-            Player nearestPlayerLeave = this.level().getNearestPlayer(this, 30.0D); // 30 block detection
+            Player nearestPlayerLeave = this.level().getNearestPlayer(this, 45.0D); // 30 block detection
 
             int state = this.entityData.get(BOSS_STATE); // gets the integer
 
@@ -145,6 +158,9 @@ public class PiglinBossEntity extends LivingEntity {
             }
             /* Attack mode START */
             else if (state == FIGHTING && nearestPlayerLeave != null) {
+                if(this.level().getNearestPlayer(this, 25.0D) == null) {
+                    this.setHealth(this.getHealth() + 0.3f); // Slow regen
+                }
                 if (this.activeAttack != null) {
                     this.activeAttack.tick(this);
 
@@ -167,7 +183,7 @@ public class PiglinBossEntity extends LivingEntity {
             /*Attack mode END */
             else if (state == FIGHTING && nearestPlayerLeave == null) {
                 // Player left range: Start health regen and timer
-                this.setHealth(this.getHealth() + 0.1f); // Slow regen
+                this.setHealth(this.getHealth() + 0.10f); // Slow regen
                 this.sleepTimer++;
 
                 if (this.sleepTimer >= 200) { // 200 ticks = 10 seconds
@@ -196,10 +212,14 @@ public class PiglinBossEntity extends LivingEntity {
             } else if (state == FIGHTING) {
                 this.awakeningAnimationState.stop();
                 int attackID = this.entityData.get(CURRENT_ATTACK);
-                if(attackID == ATTACK_FIRE_SHIELD) {
+                if(attackID == ATTACK_SHIELD_SPIN) {
+                    this.attackShieldSpinAnimationState.startIfStopped(this.tickCount);
+                }
+                else if(attackID == ATTACK_FIRE_SHIELD) {
                     this.attackFireShieldAnimationState.startIfStopped(this.tickCount);
                 } else {
                     this.attackFireShieldAnimationState.stop(); // stops if we are not doing an attack
+                    this.attackShieldSpinAnimationState.stop();
                 }
             }
         }
@@ -275,11 +295,14 @@ public class PiglinBossEntity extends LivingEntity {
 
     private void startNewAttack() {
         int phase = this.entityData.get(BOSS_PHASE);
-
+        Player nearestPlayer = this.level().getNearestPlayer(this, 10.0D);
         // Pick an attack based on the current phase
         if (phase == PHASE_1) {
+            if(nearestPlayer != null) {
+                this.activeAttack = new ShieldSpinAttack();
+            }
             // Randomly pick between Phase 1 attacks
-            if (this.random.nextBoolean()) {
+            else if (this.random.nextBoolean()) {
                 this.activeAttack = new FireShieldAttack();
             } else {
                 // need to add attack

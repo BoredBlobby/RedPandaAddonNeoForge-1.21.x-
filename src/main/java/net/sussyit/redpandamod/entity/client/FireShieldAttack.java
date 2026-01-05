@@ -190,8 +190,8 @@ public class FireShieldAttack implements IBossAttack{
 
         for (LivingEntity target : potentialTargets) {
             if (isInStarShape(center, target.position(), hitboxWidth)) {
-                target.hurt(boss.damageSources().mobAttack(boss), 12.0f);
-                target.setRemainingFireTicks(60); // Burn them!
+                target.hurt(boss.damageSources().mobAttack(boss), 15.0f);
+                target.setRemainingFireTicks(160); // Burn them!
             }
         }
     }

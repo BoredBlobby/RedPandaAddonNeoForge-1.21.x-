@@ -20,6 +20,6 @@ public class ModEventBusEvents {
 
     @SubscribeEvent
     public static void registerAttributes(EntityAttributeCreationEvent event) {
-        event.put(ModEntities.PIGLINBOSS.get(), PiglinBossEntity.createLivingAttributes().build());
+        event.put(ModEntities.PIGLINBOSS.get(), PiglinBossEntity.createAttributes().build());
     }
 }

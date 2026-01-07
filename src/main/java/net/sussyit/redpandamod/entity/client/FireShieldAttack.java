@@ -17,8 +17,8 @@ public class FireShieldAttack implements IBossAttack{
     private int timer = 0;
     private double targetAngle = 0; // The "North" of our asterisk
 
-    private final int WARNING_DURATION = 120; // 2 seconds of warning
-    private final int ATTACK_DURATION = 20;  // Total time
+    private final int WARNING_DURATION = 40; // 2 seconds of warning
+    private final int ATTACK_DURATION = 10;  // Total time
     private final int RAY_LENGTH = 30;       // How far the lines go
     private final int RAY_COUNT = 8;         // 8 Rays = Asterisk shape (*)
 
@@ -74,7 +74,7 @@ public class FireShieldAttack implements IBossAttack{
 
     @Override
     public boolean isFinished() {
-        return timer >= 140;
+        return timer >= 50;
     }
 
     @Override
@@ -84,7 +84,7 @@ public class FireShieldAttack implements IBossAttack{
 
     @Override
     public int getDuration() {
-        return 140;
+        return 50;
     }
 
     // --- HELPER METHODS ---

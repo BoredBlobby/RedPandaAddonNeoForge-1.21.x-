@@ -16,9 +16,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.sussyit.redpandamod.entity.client.FireShieldAttack;
-import net.sussyit.redpandamod.entity.client.IBossAttack;
-import net.sussyit.redpandamod.entity.client.ShieldSpinAttack;
+import net.sussyit.redpandamod.entity.client.*;
 import net.sussyit.redpandamod.util.CameraShakeUtils;
 
 public class PiglinBossEntity extends LivingEntity {
@@ -31,7 +29,7 @@ public class PiglinBossEntity extends LivingEntity {
 
     private final ServerBossEvent bossEvent =
             new ServerBossEvent(Component.literal("Piglin Boss"), BossEvent.BossBarColor.RED, BossEvent.BossBarOverlay.NOTCHED_10);
-
+    private final FissureManager fissureManager = new FissureManager();
     private final NonNullList<ItemStack> handStacks = NonNullList.withSize(2, ItemStack.EMPTY); // Mainhand and offhand
     private final NonNullList<ItemStack> armorStacks = NonNullList.withSize(4, ItemStack.EMPTY); // 4 pieces of armor
 
@@ -55,6 +53,11 @@ public class PiglinBossEntity extends LivingEntity {
     @Override
     public void knockback(double strength, double x, double z) {
         //prevents any knockback
+    }
+
+    @Override
+    public boolean fireImmune() {
+        return true; // Prevents all fire-type damage (fire, lava, magma, fireballs)
     }
 
     @Override
@@ -199,6 +202,8 @@ public class PiglinBossEntity extends LivingEntity {
     @Override
     public void tick() {
 
+
+        this.fissureManager.tick(this.level());
         super.tick();
         if (this.level().isClientSide()) {
             int state = this.entityData.get(BOSS_STATE);
@@ -217,7 +222,10 @@ public class PiglinBossEntity extends LivingEntity {
                 }
                 else if(attackID == ATTACK_FIRE_SHIELD) {
                     this.attackFireShieldAnimationState.startIfStopped(this.tickCount);
+                } else if(attackID == ATTACK_EARTHQUAKE) {
+                    this.attackEarthQuakeAnimationState.startIfStopped(this.tickCount);
                 } else {
+                    this.attackEarthQuakeAnimationState.stop();
                     this.attackFireShieldAnimationState.stop(); // stops if we are not doing an attack
                     this.attackShieldSpinAnimationState.stop();
                 }
@@ -300,12 +308,13 @@ public class PiglinBossEntity extends LivingEntity {
         if (phase == PHASE_1) {
             if(nearestPlayer != null) {
                 this.activeAttack = new ShieldSpinAttack();
-            }
-            // Randomly pick between Phase 1 attacks
-            else if (this.random.nextBoolean()) {
-                this.activeAttack = new FireShieldAttack();
             } else {
-                // need to add attack
+                int randomPick = this.random.nextInt(4); // 0, 1, or 2
+                if (randomPick < 3) {
+                    this.activeAttack = new FireShieldAttack();
+                } else if (randomPick == 3) {
+                    this.activeAttack = new EarthquakeAttack();
+                }
             }
         }
         else if (phase == PHASE_2) {
@@ -316,6 +325,11 @@ public class PiglinBossEntity extends LivingEntity {
         if (this.activeAttack != null) {
             this.activeAttack.start(this);
         }
+    }
+
+    public void triggerEarthquake() {
+        // Start 25 fissures within a 20 block radius
+        this.fissureManager.startEarthquake(this, 5, 20);
     }
 
     @Override //Prevents any attacks during death animation

@@ -307,7 +307,12 @@ public class PiglinBossEntity extends LivingEntity {
         // Pick an attack based on the current phase
         if (phase == PHASE_1) {
             if(nearestPlayer != null) {
-                this.activeAttack = new ShieldSpinAttack();
+                int randomPick = this.random.nextInt(4);
+                if (randomPick < 3) {
+                    this.activeAttack = new ShieldSpinAttack();
+                } else if (randomPick == 3){
+                    this.activeAttack = new EarthquakeAttack();
+                }
             } else {
                 int randomPick = this.random.nextInt(4); // 0, 1, or 2
                 if (randomPick < 3) {

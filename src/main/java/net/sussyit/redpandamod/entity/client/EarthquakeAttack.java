@@ -38,7 +38,7 @@ public class EarthquakeAttack implements IBossAttack{
         if (timer == CHARGE_DURATION) {
 
             // 2. Big Shake
-            CameraShakeUtils.shake(30, 3.0f, true);
+
 
             // 3. TRIGGER THE BACKGROUND LOGIC
             // This hands off the lava logic to the Entity class

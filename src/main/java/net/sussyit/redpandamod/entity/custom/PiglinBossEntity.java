@@ -26,6 +26,10 @@ public class PiglinBossEntity extends LivingEntity {
     public final AnimationState attackFireShieldAnimationState = new AnimationState();
     public final AnimationState attackShieldSpinAnimationState = new AnimationState();
     public final AnimationState attackEarthQuakeAnimationState = new AnimationState();
+    public final AnimationState attackShadowVoidAnimationState = new AnimationState();
+    public final AnimationState attackVoidCallAnimationState = new AnimationState();
+    public final AnimationState revivalAnimationState = new AnimationState();
+    public final AnimationState roarAnimationState = new AnimationState();
 
     private final ServerBossEvent bossEvent =
             new ServerBossEvent(Component.literal("Piglin Boss"), BossEvent.BossBarColor.RED, BossEvent.BossBarOverlay.NOTCHED_10);
@@ -119,6 +123,7 @@ public class PiglinBossEntity extends LivingEntity {
     public static final int AWAKENING = 1; // Playing the "wake up" animation
     public static final int FIGHTING = 2;
     public static final int DEATH = 3;
+    public static final int REVIVAL = 4;
 
     /* Persistent data versus One-Time Signals: The game needs to remmebr what the boss was doing */
     @Override
@@ -341,9 +346,34 @@ public class PiglinBossEntity extends LivingEntity {
     public void die(DamageSource source) {
         int state = this.entityData.get(BOSS_STATE);
         if (state == DEATH) return;
+        if (state == PHASE_1) {
+            // CANCEL DEATH: Do not call super.die()
 
-        this.entityData.set(BOSS_STATE, DEATH);
+            // Switch to Transition State
+            this.entityData.set(BOSS_STATE, REVIVAL);
+            this.entityData.set(BOSS_PHASE, PHASE_2);
 
-        this.level().broadcastEntityEvent(this, (byte) 72);
+            // Reset Health for Phase 2 (Full Heal)
+            this.setHealth(this.getMaxHealth());
+
+            // Clear any negative potion effects (poison, wither, etc.)
+            this.removeAllEffects();
+
+            // Reset attack logic
+            this.activeAttack = null;
+            this.attackCooldown = 0;
+
+            // Trigger a massive screen shake for the transformation
+            if (this.level().isClientSide()) {
+                // You might need a packet for this if calling from Server side logic,
+                // or rely on the state change detection in tick()
+            }
+
+            return; // EXIT the method so the boss doesn't die
+        } else if (state == PHASE_2) {
+            this.entityData.set(BOSS_STATE, DEATH);
+
+            this.level().broadcastEntityEvent(this, (byte) 72);
+        }
     }
 }

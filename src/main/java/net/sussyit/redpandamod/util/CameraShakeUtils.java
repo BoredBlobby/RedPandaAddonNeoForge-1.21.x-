@@ -7,12 +7,17 @@ public class CameraShakeUtils {
     private static float shakeIntensity = 0f;
     private static int shakeDuration = 0;
     private static boolean shouldFreeze = false;
+    private static float fovOffset = 0f;
+    private static int fovDuration = 0;
+    private static float targetFovLimit = 0.15f; // How much "extra" FOV to add
 
     // Call this from handleEntityEvent
     public static void shake(int duration, float intensity, boolean freeze) {
         shakeDuration = duration;
         shakeIntensity = intensity;
         shouldFreeze = freeze;
+        fovDuration = duration;
+        targetFovLimit = 0.25f; //how "far out" the zoom goes
     }
 
     // This needs to be called every frame (RenderGuiEvent or similar)
@@ -35,5 +40,27 @@ public class CameraShakeUtils {
 
     public static boolean isPlayerFrozen() {
         return shouldFreeze;
+    }
+
+    //FOV
+    public static void startFovZoom(int duration, float intensity) {
+        fovDuration = duration;
+        targetFovLimit = intensity;
+    }
+
+    public static float getFovModifier() {
+        return fovOffset;
+    }
+
+    // Call this in a Client Tick event to smoothly transition
+    public static void tickFov() {
+        if (fovDuration > 0) {
+            // Smoothly move toward the target intensity
+            fovOffset = Math.min(fovOffset + 0.02f, targetFovLimit);
+            fovDuration--;
+        } else {
+            // Smoothly return to 0
+            fovOffset = Math.max(fovOffset - 0.02f, 0f);
+        }
     }
 }

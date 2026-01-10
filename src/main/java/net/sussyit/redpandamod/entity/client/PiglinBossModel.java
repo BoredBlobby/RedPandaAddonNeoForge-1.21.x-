@@ -46,6 +46,10 @@ public class PiglinBossModel<T extends PiglinBossEntity> extends HierarchicalMod
         this.animate(entity.attackFireShieldAnimationState, PiglinBossAnimations.ANIM_ATTACK_FIRE_SHIELD, ageInTicks, 1f);
         this.animate(entity.attackShieldSpinAnimationState, PiglinBossAnimations.ANIM_ATTACK_SHIELD_SPIN, ageInTicks, 1f);
         this.animate(entity.attackEarthQuakeAnimationState, PiglinBossAnimations.ANIM_ATTACK_EARTHQUAKE, ageInTicks, 1f);
+        this.animate(entity.attackShadowVoidAnimationState, PiglinBossAnimations.ANIM_ATTACK_SHADOW_VOID, ageInTicks, 1f);
+        this.animate(entity.attackVoidCallAnimationState, PiglinBossAnimations.ANIM_ATTACK_VOID_CALL, ageInTicks, 1f);
+        this.animate(entity.revivalAnimationState, PiglinBossAnimations.ANIM_REVIVAL, ageInTicks, 1f);
+        this.animate(entity.roarAnimationState, PiglinBossAnimations.ANIM_ROAR, ageInTicks, 1f);
     }
 
     @Override

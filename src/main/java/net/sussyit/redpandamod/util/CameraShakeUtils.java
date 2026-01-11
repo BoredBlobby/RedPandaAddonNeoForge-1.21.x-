@@ -1,8 +1,6 @@
 package net.sussyit.redpandamod.util;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.util.Mth;
-
 public class CameraShakeUtils {
     private static float shakeIntensity = 0f;
     private static int shakeDuration = 0;
@@ -39,13 +37,8 @@ public class CameraShakeUtils {
     }
 
     public static boolean isPlayerFrozen() {
+        //System.out.println("Current Player: " + shouldFreeze);
         return shouldFreeze;
-    }
-
-    //FOV
-    public static void startFovZoom(int duration, float intensity) {
-        fovDuration = duration;
-        targetFovLimit = intensity;
     }
 
     public static float getFovModifier() {

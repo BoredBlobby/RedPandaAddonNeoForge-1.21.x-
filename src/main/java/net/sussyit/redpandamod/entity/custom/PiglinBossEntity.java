@@ -10,6 +10,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -18,6 +19,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.sussyit.redpandamod.entity.client.*;
 import net.sussyit.redpandamod.util.CameraShakeUtils;
+
+import java.sql.SQLOutput;
 
 public class PiglinBossEntity extends LivingEntity {
     public final AnimationState deathAnimationState = new AnimationState();
@@ -39,6 +42,7 @@ public class PiglinBossEntity extends LivingEntity {
 
     private final CameraShakeUtils cameraShakeUtils = new CameraShakeUtils();
 
+
     public PiglinBossEntity(EntityType<? extends LivingEntity> entityType, Level level) {
         super(entityType, level);
         this.setHealth(this.getMaxHealth()); // Ensures it starts at 300
@@ -47,7 +51,7 @@ public class PiglinBossEntity extends LivingEntity {
 
     public static AttributeSupplier.Builder createAttributes() {
         return LivingEntity.createLivingAttributes()
-                .add(Attributes.MAX_HEALTH, 300D)
+                .add(Attributes.MAX_HEALTH, 30)
                 .add(Attributes.MOVEMENT_SPEED, 0.35D)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 1.0D)
                 .add(Attributes.FOLLOW_RANGE, 24D);
@@ -110,31 +114,6 @@ public class PiglinBossEntity extends LivingEntity {
         this.bossEvent.removePlayer(serverPlayer);
     }
 
-
-    /* States */
-    // EntityDataAccessor: type of the "key" that unlocks an Integer calue inside an enityt's data folder
-    //PiglinBossEneity.class tells the game which entity this data belongs to
-    //EnetiyDatSerializer.INT tells the game how to turn this data into "bits to sent it over th eintenert
-    /* Stores all the current states of the mob into a folder that can be called later on for client side */
-    private static final EntityDataAccessor<Integer> BOSS_STATE =
-            SynchedEntityData.defineId(PiglinBossEntity.class, EntityDataSerializers.INT);
-
-    public static final int SLEEPING = 0;
-    public static final int AWAKENING = 1; // Playing the "wake up" animation
-    public static final int FIGHTING = 2;
-    public static final int DEATH = 3;
-    public static final int REVIVAL = 4;
-
-    /* Persistent data versus One-Time Signals: The game needs to remmebr what the boss was doing */
-    @Override
-    protected void defineSynchedData(SynchedEntityData.Builder builder) {
-        super.defineSynchedData(builder);
-        // This initializes the state so the game knows it exists
-        builder.define(BOSS_STATE, SLEEPING);
-        builder.define(BOSS_PHASE, PHASE_1);
-        builder.define(CURRENT_ATTACK, ATTACK_NONE);
-    }
-
     /*Checks the distance tot eh player every second */
 
     private int sleepTimer = 0; // Internal timer for the 10-second rule
@@ -163,6 +142,26 @@ public class PiglinBossEntity extends LivingEntity {
                     this.entityData.set(BOSS_STATE, FIGHTING);
                     this.sleepTimer = 0; //BE AWARE: using sleep timer; careful of interference
                 }
+            }
+            else if(state == REVIVAL) {
+                // 1. Increase timer
+                this.sleepTimer++; // Reusing sleepTimer, or create a new 'transitionTimer'
+
+                // 100 ticks = 5 seconds
+                if (this.sleepTimer >= 95) {
+                    this.entityData.set(BOSS_STATE, ROAR);
+                    this.sleepTimer = 0;
+                    // The boss is now in Phase 2 FIGHTING mode!
+                }
+            } else if(state == ROAR) {
+                this.sleepTimer++;
+                this.setHealth(this.getHealth() + 0.30f);
+
+                if(this.sleepTimer >= 30) {
+                    this.entityData.set(BOSS_STATE, FIGHTING);
+                    this.setHealth(this.getMaxHealth());
+                }
+                this.level().broadcastEntityEvent(this, (byte) 64);
             }
             /* Attack mode START */
             else if (state == FIGHTING && nearestPlayerLeave != null) {
@@ -219,7 +218,16 @@ public class PiglinBossEntity extends LivingEntity {
             } else if (state == AWAKENING) {
                 this.sleepAnimationState.stop();
                 this.awakeningAnimationState.startIfStopped(this.tickCount);
+            } else if (state == REVIVAL) {
+                this.attackEarthQuakeAnimationState.stop();
+                this.attackFireShieldAnimationState.stop(); // stops if we are not doing an attack
+                this.attackShieldSpinAnimationState.stop();
+                this.revivalAnimationState.startIfStopped(this.tickCount);
+            } else if(state == ROAR) {
+                this.revivalAnimationState.stop();
+                this.roarAnimationState.startIfStopped(this.tickCount);
             } else if (state == FIGHTING) {
+                this.roarAnimationState.stop();
                 this.awakeningAnimationState.stop();
                 int attackID = this.entityData.get(CURRENT_ATTACK);
                 if(attackID == ATTACK_SHIELD_SPIN) {
@@ -302,6 +310,39 @@ public class PiglinBossEntity extends LivingEntity {
 
     public static final int ATTACK_NONE = 9;
 
+    /* States */
+    // EntityDataAccessor: type of the "key" that unlocks an Integer calue inside an enityt's data folder
+    //PiglinBossEneity.class tells the game which entity this data belongs to
+    //EnetiyDatSerializer.INT tells the game how to turn this data into "bits to sent it over th eintenert
+    /* Stores all the current states of the mob into a folder that can be called later on for client side */
+    private static final EntityDataAccessor<Integer> BOSS_STATE =
+            SynchedEntityData.defineId(PiglinBossEntity.class, EntityDataSerializers.INT);
+
+    public static final int SLEEPING = 0;
+    public static final int AWAKENING = 1; // Playing the "wake up" animation
+    public static final int FIGHTING = 2;
+    public static final int DEATH = 3;
+    public static final int REVIVAL = 4;
+    public static final int ROAR = 5;
+
+    /* Persistent data versus One-Time Signals: The game needs to remmebr what the boss was doing */
+    @Override
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        // This initializes the state so the game knows it exists
+        builder.define(BOSS_STATE, SLEEPING);
+        builder.define(BOSS_PHASE, PHASE_1);
+        builder.define(CURRENT_ATTACK, ATTACK_NONE);
+    }
+
+    public int getBossState() {
+        return this.entityData.get(BOSS_STATE);
+    }
+
+    public int getBossPhase() {
+        return this.entityData.get(BOSS_PHASE);
+    }
+
     public void setAttackState(int currAttack) {
         this.entityData.set(CURRENT_ATTACK, currAttack);
     }
@@ -345,8 +386,8 @@ public class PiglinBossEntity extends LivingEntity {
     @Override //Prevents any attacks during death animation
     public void die(DamageSource source) {
         int state = this.entityData.get(BOSS_STATE);
-        if (state == DEATH) return;
-        if (state == PHASE_1) {
+        int phase = this.entityData.get(BOSS_PHASE);
+        if (phase == PHASE_1) {
             // CANCEL DEATH: Do not call super.die()
 
             // Switch to Transition State
@@ -354,7 +395,7 @@ public class PiglinBossEntity extends LivingEntity {
             this.entityData.set(BOSS_PHASE, PHASE_2);
 
             // Reset Health for Phase 2 (Full Heal)
-            this.setHealth(this.getMaxHealth());
+            this.setHealth(1);
 
             // Clear any negative potion effects (poison, wither, etc.)
             this.removeAllEffects();
@@ -370,10 +411,20 @@ public class PiglinBossEntity extends LivingEntity {
             }
 
             return; // EXIT the method so the boss doesn't die
-        } else if (state == PHASE_2) {
+        } else if (phase == PHASE_2) {
+            if (state == DEATH) return;
             this.entityData.set(BOSS_STATE, DEATH);
 
             this.level().broadcastEntityEvent(this, (byte) 72);
         }
+    }
+
+    @Override
+    public boolean isInvulnerableTo(DamageSource source) {
+        // If transitioning, only take void damage (so it doesn't get stuck if it falls out of world)
+        if (this.entityData.get(BOSS_STATE) == REVIVAL) {
+            return !source.is(DamageTypes.FELL_OUT_OF_WORLD);
+        }
+        return super.isInvulnerableTo(source);
     }
 }

@@ -127,14 +127,14 @@ public class ShieldSpinAttack implements IBossAttack{
     }
 
     private void detonateCircle(PiglinBossEntity boss) {
-        List<LivingEntity> targets = boss.level().getEntitiesOfClass(LivingEntity.class, boss.getBoundingBox().inflate(RADIUS), e -> e != boss);
-        for (LivingEntity target : targets) {
-            if (boss.distanceTo(target) <= RADIUS) {
-                target.hurt(boss.damageSources().mobAttack(boss), 15.0f);
+        List<LivingEntity> targets = boss.level().getEntitiesOfClass(LivingEntity.class, boss.getBoundingBox().inflate(RADIUS), e -> e != boss); // finds all living targets in boss's bounding boxx and puts them in a list
+        for (LivingEntity target : targets) { // goes through each entity in list
+            if (boss.distanceTo(target) <= RADIUS) { // if mob inside circle, only checks those already in box
+                target.hurt(boss.damageSources().mobAttack(boss), 15.0f);  // hurts player
                 // Knockback away from boss
                 double dx = target.getX() - boss.getX();
                 double dz = target.getZ() - boss.getZ();
-                target.knockback(3.5, -dx, -dz);
+                target.knockback(3.5, -dx, -dz); // player knocked back
             }
         }
     }

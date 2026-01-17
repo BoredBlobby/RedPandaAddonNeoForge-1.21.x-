@@ -21,6 +21,7 @@ import net.sussyit.redpandamod.entity.client.*;
 import net.sussyit.redpandamod.util.CameraShakeUtils;
 
 import java.sql.SQLOutput;
+import java.util.List;
 
 public class PiglinBossEntity extends LivingEntity {
     public final AnimationState deathAnimationState = new AnimationState();
@@ -145,10 +146,14 @@ public class PiglinBossEntity extends LivingEntity {
             }
             else if(state == REVIVAL) {
                 // 1. Increase timer
+                this.entityData.set(CURRENT_ATTACK, ATTACK_NONE);
                 this.sleepTimer++; // Reusing sleepTimer, or create a new 'transitionTimer'
 
                 // 100 ticks = 5 seconds
                 if (this.sleepTimer >= 95) {
+                    double dx = nearestPlayer.getX() - this.getX();
+                    double dz = nearestPlayer.getZ() - this.getZ();
+                    nearestPlayer.knockback(1.5, -dx, -dz);
                     this.entityData.set(BOSS_STATE, ROAR);
                     this.sleepTimer = 0;
                     // The boss is now in Phase 2 FIGHTING mode!
@@ -206,12 +211,23 @@ public class PiglinBossEntity extends LivingEntity {
     @Override
     public void tick() {
 
-
         this.fissureManager.tick(this.level());
         super.tick();
+            int state = this.entityData.get(BOSS_STATE); // gets the integer
+            if(state == ROAR) {
+                List<LivingEntity> targets = this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(14.0), e -> e != this);
+                for (LivingEntity target : targets) {
+                    if (this.distanceTo(target) <= 14.0) {
+                        System.out.println("knocking player back");
+                        // Knockback away from boss
+                        target.hurt(this.damageSources().mobAttack(this), 0.0f);
+                        double dx = target.getX() - this.getX();
+                        double dz = target.getZ() - this.getZ();
+                        target.knockback(1.5, -dx, -dz);
+                    }
+                }
+            }
         if (this.level().isClientSide()) {
-            int state = this.entityData.get(BOSS_STATE);
-
             if (state == SLEEPING) {
                 this.sleepAnimationState.startIfStopped(this.tickCount);
                 this.awakeningAnimationState.stop();
@@ -257,7 +273,7 @@ public class PiglinBossEntity extends LivingEntity {
         else if (id == 64) {
             // 1. Play the Roar Sound
             this.level().playLocalSound(this.getX(), this.getY(), this.getZ(),
-                    SoundEvents.ENDER_DRAGON_GROWL, this.getSoundSource(), 1.0f, 0.8f, false);
+                    SoundEvents.ENDER_DRAGON_GROWL, this.getSoundSource(), 2.5f, 0.8f, false);
 
             // 2. Trigger Screen Shake (Example using vanilla particles or a mod's API)
             cameraShakeUtils.shake(70, 1f, true);

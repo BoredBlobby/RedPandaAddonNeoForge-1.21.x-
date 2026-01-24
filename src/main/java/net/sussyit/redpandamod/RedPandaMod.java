@@ -3,6 +3,7 @@ package net.sussyit.redpandamod;
 import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.sussyit.redpandamod.block.ModBlocks;
 import net.sussyit.redpandamod.entity.ModEntities;
+import net.sussyit.redpandamod.entity.client.HedgehogRenderer;
 import net.sussyit.redpandamod.entity.client.PiglinBossRenderer;
 import net.sussyit.redpandamod.item.ModCreativeModeTabs;
 import net.sussyit.redpandamod.item.ModItems;
@@ -67,6 +68,7 @@ public class RedPandaMod {
     private void addCreative(BuildCreativeModeTabContentsEvent event) {
         if(event.getTabKey() == CreativeModeTabs.INGREDIENTS) {
             event.accept(ModItems.RED_PANDA_TREAT);
+            event.accept(ModItems.GOLD_RING);
         }
         if(event.getTabKey() == CreativeModeTabs.BUILDING_BLOCKS) {
             event.accept(ModBlocks.DANIEL_CHUNG);
@@ -87,6 +89,7 @@ public class RedPandaMod {
         @SubscribeEvent
         static void onClientSetup(FMLClientSetupEvent event) {
             EntityRenderers.register(ModEntities.PIGLINBOSS.get(), PiglinBossRenderer::new);
+            EntityRenderers.register(ModEntities.HEDGEHOG.get(), HedgehogRenderer::new);
         }
     }
 }

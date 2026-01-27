@@ -22,7 +22,11 @@ public class HedgehogRenderer extends MobRenderer<HedgehogEntity, HedgehogModel<
 
     @Override
     public ResourceLocation getTextureLocation(HedgehogEntity hedgehogEntity) {
-        return REG_TEXTURE;
+        if(hedgehogEntity.getSkinID() == 0) {
+            return REG_TEXTURE;
+        } else {
+            return BLUE_TEXTURE;
+        }
     }
 
     @Override

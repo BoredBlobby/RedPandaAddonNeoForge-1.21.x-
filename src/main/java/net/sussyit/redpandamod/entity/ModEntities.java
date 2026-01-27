@@ -8,6 +8,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 import net.sussyit.redpandamod.RedPandaMod;
 import net.sussyit.redpandamod.entity.custom.HedgehogEntity;
 import net.sussyit.redpandamod.entity.custom.PiglinBossEntity;
+import net.sussyit.redpandamod.entity.custom.ThingEntity;
 
 import java.util.function.Supplier;
 
@@ -22,6 +23,10 @@ public class ModEntities {
     public static final Supplier<EntityType<HedgehogEntity>> HEDGEHOG =
             ENTITY_TYPES.register("hedgehog", () -> EntityType.Builder.of(HedgehogEntity::new, MobCategory.CREATURE)
                     .sized(.3f, .3f).build("hedgehog"));
+
+    public static final Supplier<EntityType<ThingEntity>> THING =
+            ENTITY_TYPES.register("thing", () -> EntityType.Builder.of(ThingEntity::new, MobCategory.CREATURE)
+                    .sized(2f, 1.5f).build("thing"));
 
     public static void register(IEventBus eventBus) {
         ENTITY_TYPES.register(eventBus);

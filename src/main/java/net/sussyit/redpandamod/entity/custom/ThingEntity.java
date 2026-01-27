@@ -11,7 +11,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.sussyit.redpandamod.util.CameraShakeUtils;
 
-public class Thing extends LivingEntity {
+public class ThingEntity extends LivingEntity {
 
     private final NonNullList<ItemStack> handStacks = NonNullList.withSize(2, ItemStack.EMPTY); // Mainhand and offhand
     private final NonNullList<ItemStack> armorStacks = NonNullList.withSize(4, ItemStack.EMPTY); // 4 pieces of armor
@@ -19,7 +19,7 @@ public class Thing extends LivingEntity {
 
 
 
-    protected Thing(EntityType<? extends LivingEntity> entityType, Level level) {
+    public ThingEntity(EntityType<? extends LivingEntity> entityType, Level level) {
         super(entityType, level);
     }
     public static AttributeSupplier.Builder createAttributes() {
@@ -60,12 +60,15 @@ public class Thing extends LivingEntity {
     }
 
     @Override
-    public void setItemSlot(EquipmentSlot equipmentSlot, ItemStack itemStack) {
-
+    public void setItemSlot(EquipmentSlot slot, ItemStack stack) {
+        if(slot.getType() ==  EquipmentSlot.Type.HAND)
+            handStacks.set(slot.getIndex(), stack); // index 0 or 1
+        else
+            armorStacks.set(slot.getIndex(), stack); // index 0-3
     }
 
     @Override
     public HumanoidArm getMainArm() {
-        return null;
+        return HumanoidArm.RIGHT;
     }
 }

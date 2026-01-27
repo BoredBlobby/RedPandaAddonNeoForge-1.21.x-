@@ -5,6 +5,7 @@ import net.sussyit.redpandamod.block.ModBlocks;
 import net.sussyit.redpandamod.entity.ModEntities;
 import net.sussyit.redpandamod.entity.client.HedgehogRenderer;
 import net.sussyit.redpandamod.entity.client.PiglinBossRenderer;
+import net.sussyit.redpandamod.entity.client.ThingRenderer;
 import net.sussyit.redpandamod.item.ModCreativeModeTabs;
 import net.sussyit.redpandamod.item.ModItems;
 import org.slf4j.Logger;
@@ -90,6 +91,7 @@ public class RedPandaMod {
         static void onClientSetup(FMLClientSetupEvent event) {
             EntityRenderers.register(ModEntities.PIGLINBOSS.get(), PiglinBossRenderer::new);
             EntityRenderers.register(ModEntities.HEDGEHOG.get(), HedgehogRenderer::new);
+            EntityRenderers.register(ModEntities.THING.get(), ThingRenderer::new);
         }
     }
 }

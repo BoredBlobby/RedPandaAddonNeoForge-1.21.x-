@@ -19,11 +19,17 @@ public class ThingRenderer extends LivingEntityRenderer<ThingEntity, ThingModel<
 
 
     public ThingRenderer(EntityRendererProvider.Context context) {
-        super(context, new ThingModel<>(context.bakeLayer(ThingModel.LAYER_LOCATION)), 2);
+        super(context, new ThingModel<>(context.bakeLayer(ThingModel.LAYER_LOCATION)), 1);
     }
 
     @Override
     public ResourceLocation getTextureLocation(ThingEntity thingEntity) {
-        return NORMAL_TEXTURE;
+        if(thingEntity.getState() == ThingEntity.NORMAL_STATE || thingEntity.getState() == ThingEntity.SEC_NORMAL_STATE || thingEntity.getState() == ThingEntity.EXPLODING_STATE) {
+            return NORMAL_TEXTURE;
+        } else if (thingEntity.getState() == ThingEntity.SMILE_STATE) {
+            return TRANSITION_TEXTURE;
+        } else {
+            return SMILING_TEXTURE;
+        }
     }
 }

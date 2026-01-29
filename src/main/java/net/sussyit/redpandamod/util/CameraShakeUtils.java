@@ -1,6 +1,10 @@
 package net.sussyit.redpandamod.util;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec3;
+
 public class CameraShakeUtils {
     private static float shakeIntensity = 0f;
     private static int shakeDuration = 0;
@@ -10,12 +14,12 @@ public class CameraShakeUtils {
     private static float targetFovLimit = 0.15f; // How much "extra" FOV to add
 
     // Call this from handleEntityEvent
-    public static void shake(int duration, float intensity, boolean freeze) {
+    public static void shake(int duration, float intensity, boolean freeze, float fovLimit) {
         shakeDuration = duration;
         shakeIntensity = intensity;
         shouldFreeze = freeze;
         fovDuration = duration;
-        targetFovLimit = 0.25f; //how "far out" the zoom goes
+        targetFovLimit = fovLimit; //how "far out" the zoom goes
     }
 
     // This needs to be called every frame (RenderGuiEvent or similar)
@@ -55,5 +59,30 @@ public class CameraShakeUtils {
             // Smoothly return to 0
             fovOffset = Math.max(fovOffset - 0.02f, 0f);
         }
+    }
+
+
+    public static void forcePlayerLookAt(Player player, Entity target) {
+        if (player == null || target == null) return;
+
+        Vec3 playerEyes = player.getEyePosition();
+        Vec3 targetPos = target.getEyePosition();
+
+        double dX = targetPos.x - playerEyes.x;
+        double dY = targetPos.y - playerEyes.y;
+        double dZ = targetPos.z - playerEyes.z;
+        double dXZ = Math.sqrt(dX * dX + dZ * dZ);
+
+        // Calculate Yaw and Pitch in degrees
+        float yaw = (float) (Math.atan2(dZ, dX) * (180 / Math.PI)) - 90.0F;
+        float pitch = (float) (-(Math.atan2(dY, dXZ) * (180 / Math.PI)));
+
+        // Apply rotations to the player
+        player.setYRot(yaw);
+        player.setXRot(pitch);
+
+        // Crucial: Update the "Old" rotations to prevent the camera from snapping back
+        player.yRotO = yaw;
+        player.xRotO = pitch;
     }
 }

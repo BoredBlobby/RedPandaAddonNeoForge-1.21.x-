@@ -61,7 +61,7 @@ public class FireShieldAttack implements IBossAttack{
             detonateAsterisk(boss);
 
             // 3. Effects
-            CameraShakeUtils.shake(20, 1.5f, false);
+            CameraShakeUtils.shake(20, 1.5f, false, 0f);
             // boss.playSound(SoundEvents.GENERIC_EXPLODE, 1.0f, 1.0f);
         }
     }

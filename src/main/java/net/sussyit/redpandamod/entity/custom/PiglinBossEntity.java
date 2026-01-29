@@ -276,7 +276,7 @@ public class PiglinBossEntity extends LivingEntity {
                     SoundEvents.ENDER_DRAGON_GROWL, this.getSoundSource(), 2.5f, 0.8f, false);
 
             // 2. Trigger Screen Shake (Example using vanilla particles or a mod's API)
-            cameraShakeUtils.shake(70, 1f, true);
+            cameraShakeUtils.shake(70, 1f, true, 0.25f);
         } else {
             super.handleEntityEvent(id);
         }
@@ -421,10 +421,6 @@ public class PiglinBossEntity extends LivingEntity {
             this.attackCooldown = 0;
 
             // Trigger a massive screen shake for the transformation
-            if (this.level().isClientSide()) {
-                // You might need a packet for this if calling from Server side logic,
-                // or rely on the state change detection in tick()
-            }
 
             return; // EXIT the method so the boss doesn't die
         } else if (phase == PHASE_2) {

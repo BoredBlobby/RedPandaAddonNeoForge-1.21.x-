@@ -30,7 +30,7 @@ public class EarthquakeAttack implements IBossAttack{
 
         // Phase 1: Charging Shake
         if (timer < CHARGE_DURATION) {
-            CameraShakeUtils.shake(5, 0.5f, false); // Light rumble
+            CameraShakeUtils.shake(5, 0.5f, false, 0.25f); // Light rumble
             // Particles gathering at feet?
         }
 

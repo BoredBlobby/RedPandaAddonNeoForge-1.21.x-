@@ -3,6 +3,7 @@ package net.sussyit.redpandamod;
 import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.sussyit.redpandamod.block.ModBlocks;
 import net.sussyit.redpandamod.entity.ModEntities;
+import net.sussyit.redpandamod.entity.client.GfRenderer;
 import net.sussyit.redpandamod.entity.client.HedgehogRenderer;
 import net.sussyit.redpandamod.entity.client.PiglinBossRenderer;
 import net.sussyit.redpandamod.entity.client.ThingRenderer;
@@ -76,6 +77,9 @@ public class RedPandaMod {
             event.accept(ModBlocks.DANIEL);
             event.accept(ModBlocks.KYLE);
         }
+        if(event.getTabKey() == CreativeModeTabs.COMBAT) {
+            event.accept(ModItems.SCYTHE);
+        }
     }
 
     // You can use SubscribeEvent and let the Event Bus discover methods to call
@@ -92,6 +96,7 @@ public class RedPandaMod {
             EntityRenderers.register(ModEntities.PIGLINBOSS.get(), PiglinBossRenderer::new);
             EntityRenderers.register(ModEntities.HEDGEHOG.get(), HedgehogRenderer::new);
             EntityRenderers.register(ModEntities.THING.get(), ThingRenderer::new);
+            EntityRenderers.register(ModEntities.GF.get(), GfRenderer::new);
         }
     }
 }

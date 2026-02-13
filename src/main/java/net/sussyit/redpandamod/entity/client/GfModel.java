@@ -7,20 +7,20 @@ package net.sussyit.redpandamod.entity.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.HierarchicalModel;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import net.sussyit.redpandamod.RedPandaMod;
 import net.sussyit.redpandamod.entity.custom.GfEntity;
 
 public class GfModel<T extends GfEntity> extends HierarchicalModel<T> {
     // This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
     public static final ModelLayerLocation LAYER_LOCATION =
-            new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(RedPandaMod.MODID, "gf"), "main");
+            new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(RedPandaMod.MODID, "gfentity"), "main");
     private final ModelPart root;
     private final ModelPart player;
     private final ModelPart body;
@@ -95,9 +95,29 @@ public class GfModel<T extends GfEntity> extends HierarchicalModel<T> {
 
     @Override
     public void setupAnim(GfEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-        this.animateWalk(GfAnimations.ANIM_WALKING, limbSwing * 2f, limbSwingAmount, 1f, 1f);
-        this.animate(entity.revealAnimationState, GfAnimations.ANIM_REVEAL, 1f, 1f);
-        this.animate(entity.bobaAnimationState, GfAnimations.ANIM_BOBA, 1f, 1f);
+        // This resets all parts to their default positions so animations don't "stack"
+        this.root().getAllParts().forEach(ModelPart::resetPose);
+
+        this.boba.visible = false;
+
+        // Apply standard vanilla-style limb swinging
+        // We manually rotate the arms and legs based on the limbSwing (distance) and limbSwingAmount (speed)
+        this.right_leg.xRot = Mth.cos(limbSwing * 0.6662F) * 1.4F * limbSwingAmount;
+        this.left_leg.xRot = Mth.cos(limbSwing * 0.6662F + (float)Math.PI) * 1.4F * limbSwingAmount;
+        this.right_arm.xRot = Mth.cos(limbSwing * 0.6662F + (float)Math.PI) * 2.0F * limbSwingAmount * 0.5F;
+        this.left_arm.xRot = Mth.cos(limbSwing * 0.6662F) * 2.0F * limbSwingAmount * 0.5F;
+
+        // Keep your custom non-walking animations
+        this.animate(entity.revealAnimationState, GfAnimations.ANIM_REVEAL, ageInTicks, 1f);
+
+        if (entity.bobaAnimationState.isStarted()) {
+            this.boba.visible = true;
+            this.animate(entity.bobaAnimationState, GfAnimations.ANIM_BOBA, ageInTicks, 1f);
+        }
+
+        // Optional: Make the head look at the player
+        this.head.yRot = netHeadYaw * ((float)Math.PI / 180F);
+        this.head.xRot = headPitch * ((float)Math.PI / 180F);
     }
 
     @Override
@@ -107,6 +127,6 @@ public class GfModel<T extends GfEntity> extends HierarchicalModel<T> {
 
     @Override
     public ModelPart root() {
-        return this.root();
+        return this.root;
     }
 }

@@ -2,6 +2,7 @@ package net.sussyit.redpandamod;
 
 import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.sussyit.redpandamod.block.ModBlocks;
+import net.sussyit.redpandamod.effect.ModEffects;
 import net.sussyit.redpandamod.entity.ModEntities;
 import net.sussyit.redpandamod.entity.client.GfRenderer;
 import net.sussyit.redpandamod.entity.client.HedgehogRenderer;
@@ -53,6 +54,8 @@ public class RedPandaMod {
         ModItems.register(modEventBus);
         ModBlocks.register(modEventBus);
 
+        ModEffects.register(modEventBus);
+
         ModEntities.register(modEventBus);
 
         // Register the item to a creative tab
@@ -71,6 +74,10 @@ public class RedPandaMod {
         if(event.getTabKey() == CreativeModeTabs.INGREDIENTS) {
             event.accept(ModItems.RED_PANDA_TREAT);
             event.accept(ModItems.GOLD_RING);
+            event.accept(ModItems.CHOCOLATEBOX);
+        }
+        if(event.getTabKey() == CreativeModeTabs.FOOD_AND_DRINKS) {
+            event.accept(ModItems.MATCHABOBA);
         }
         if(event.getTabKey() == CreativeModeTabs.BUILDING_BLOCKS) {
             event.accept(ModBlocks.DANIEL_CHUNG);

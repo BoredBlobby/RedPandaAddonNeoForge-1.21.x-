@@ -2,6 +2,8 @@
   "item.redpandamod.redpandatreat": "Red Panda Treat",
   "item.redpandamod.goldring": "Gold Ring",
   "item.redpandamod.scythe": "Scythe",
+  "item.redpandamod.matchaboba": "Matcha Boba",
+  "item.redpandamod.chocolatebocx": "Heart chocolates",
 
   "block.redpandamod.daniel_chung": "DANIEL LOVES CHENYU",
   "block.redpandamod.daniel": "Daniel",
@@ -12,5 +14,8 @@
   "entity.mccourse.piglinboss": "Piglin Boss",
   "entity.redpandamod.piglinboss": "Billy John the 31st(of December)",
   "entity.redpandamod.thing": "Bob",
-  "entity.redpandamod.hedgehog": "Hedgehog"
+  "entity.redpandamod.hedgehog": "Hedgehog",
+  "entity.redpandamod.gf": "Gf",
+
+  "effect.redpandamod.performative": "Performative"
 }

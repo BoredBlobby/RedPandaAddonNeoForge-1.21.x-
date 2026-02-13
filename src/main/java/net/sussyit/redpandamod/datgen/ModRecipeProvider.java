@@ -27,5 +27,22 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                 .pattern("AAA")
                 .define('A', Items.GOLD_INGOT)
                 .unlockedBy("has_gold_ingot", has(Items.GOLD_INGOT)).save(recipeOutput);
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.FOOD, ModItems.MATCHABOBA.get())
+                .pattern("CCC")
+                .pattern("CBC")
+                .pattern("CAC")
+                .define('A', Items.GLASS_BOTTLE)
+                .define('B', Items.WATER_BUCKET)
+                .define('C', Items.TALL_GRASS)
+                .unlockedBy("has_grass", has(Items.TALL_GRASS)).save(recipeOutput);
+        ShapedRecipeBuilder.shaped(RecipeCategory.FOOD, ModItems.CHOCOLATEBOX.get())
+                .pattern(" B ")
+                .pattern(" A ")
+                .pattern(" C ")
+                .define('A', Items.COCOA_BEANS)
+                .define('B', Items.GOLD_INGOT)
+                .define('C', Items.OXEYE_DAISY)
+                .unlockedBy("has_cocoa", has(Items.COCOA_BEANS)).save(recipeOutput);
     }
 }

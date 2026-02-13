@@ -13,8 +13,12 @@ public class ModItems {
             () -> new Item(new Item.Properties()));
     public static final DeferredItem<Item> GOLD_RING = ITEMS.register("goldring",
             () -> new Item(new Item.Properties()));
-    public static final DeferredItem<Item> SCYTHE = ITEMS.register("scythe",
+    public static final DeferredItem<Item> CHOCOLATEBOX = ITEMS.register("chocolatebox",
             () -> new Item(new Item.Properties()));
+    public static final DeferredItem<Item> SCYTHE = ITEMS.register("scythe",
+            () -> new /*ScytheItem*/ Item(new Item.Properties()));
+    public static final DeferredItem<Item> MATCHABOBA = ITEMS.register("matchaboba",
+            () -> new MatchaBoba(new Item.Properties().stacksTo(1)));
 
 
     public static void register(IEventBus eventBus) {

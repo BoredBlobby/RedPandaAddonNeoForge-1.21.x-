@@ -12,6 +12,7 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -20,7 +21,6 @@ import net.minecraft.world.entity.ai.goal.target.*;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.Turtle;
 import net.minecraft.world.entity.animal.Wolf;
-import net.minecraft.world.entity.animal.horse.Llama;
 import net.minecraft.world.entity.monster.AbstractSkeleton;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
@@ -35,6 +35,7 @@ import net.neoforged.neoforge.event.EventHooks;
 import net.sussyit.redpandamod.effect.ModEffects;
 import net.sussyit.redpandamod.entity.GfVariant;
 import net.sussyit.redpandamod.item.ModItems;
+import net.sussyit.redpandamod.sounds.ModSounds;
 
 import javax.annotation.Nullable;
 
@@ -190,6 +191,8 @@ public class GfEntity extends Wolf {
                     this.heal(2.0F * f);
                     itemstack.consume(1, player);
                     this.gameEvent(GameEvent.EAT);
+                    this.level().playSound(null, this.getX(), this.getY(), this.getZ(),
+                            ModSounds.GFBOBA.get(), this.getSoundSource(), 1.0F, 1.0F);
                     return InteractionResult.sidedSuccess(this.level().isClientSide());
                 } else if (itemstack.is(Items.SHEARS) && !this.level().isClientSide && this.getPhase() != REVEAL) {
                     if(this.getPhase() == LEAKING) {
@@ -225,10 +228,14 @@ public class GfEntity extends Wolf {
 
     private void tryToTame(Player player) {
         if(!player.hasEffect(ModEffects.PERFORMATIVE_EFFECT)) {
+            this.level().playSound(null, this.getX(), this.getY(), this.getZ(),
+                    ModSounds.GFREJECT.get(), this.getSoundSource(), 1.0F, 1.0F);
             this.level().broadcastEntityEvent(this, (byte)6);
             return; // Exit the method immediately so no taming happens
         }
         if (this.random.nextInt(3) == 0 && !EventHooks.onAnimalTame(this, player)) {
+            this.level().playSound(null, this.getX(), this.getY(), this.getZ(),
+                    ModSounds.GFACCEPT.get(), this.getSoundSource(), 1.0F, 1.0F);
             this.tame(player);
             this.navigation.stop();
             this.setTarget((LivingEntity)null);
@@ -243,6 +250,11 @@ public class GfEntity extends Wolf {
     @Override
     public SoundEvent getAmbientSound() {
         return SoundEvents.ALLAY_AMBIENT_WITH_ITEM;
+    }
+
+    @Override
+    public SoundEvent getHurtSound(DamageSource damageSource) {
+        return ModSounds.GFHURT.get();
     }
 
     public boolean isFood(ItemStack stack) {

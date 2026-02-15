@@ -1,0 +1,26 @@
+{
+  "gfhurt": {
+    "subtitle": "sounds.redpandamod.gfhurt",
+    "sounds": [
+      "redpandamod:gfhurt"
+    ]
+  },
+  "gfboba": {
+    "subtitle": "sounds.redpandamod.gfboba",
+    "sounds": [
+      "redpandamod:gfboba"
+    ]
+  },
+  "gfaccept": {
+    "subtitle": "sounds.redpandamod.gfaccept",
+    "sounds": [
+      "redpandamod:gfaccept"
+    ]
+  },
+  "gfreject": {
+    "subtitle": "sounds.redpandamod.gfreject",
+    "sounds": [
+      "redpandamod:gfreject"
+    ]
+  }
+}

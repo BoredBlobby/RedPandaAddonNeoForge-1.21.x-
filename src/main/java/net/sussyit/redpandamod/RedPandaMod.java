@@ -10,6 +10,7 @@ import net.sussyit.redpandamod.entity.client.PiglinBossRenderer;
 import net.sussyit.redpandamod.entity.client.ThingRenderer;
 import net.sussyit.redpandamod.item.ModCreativeModeTabs;
 import net.sussyit.redpandamod.item.ModItems;
+import net.sussyit.redpandamod.sounds.ModSounds;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
@@ -55,6 +56,8 @@ public class RedPandaMod {
         ModBlocks.register(modEventBus);
 
         ModEffects.register(modEventBus);
+
+        ModSounds.register(modEventBus);
 
         ModEntities.register(modEventBus);
 

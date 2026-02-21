@@ -16,7 +16,7 @@ public class ModItems {
     public static final DeferredItem<Item> CHOCOLATEBOX = ITEMS.register("chocolatebox",
             () -> new Item(new Item.Properties()));
     public static final DeferredItem<Item> SCYTHE = ITEMS.register("scythe",
-            () -> new /*ScytheItem*/ Item(new Item.Properties()));
+            () -> new ScytheItem(new Item.Properties()));
     public static final DeferredItem<Item> MATCHABOBA = ITEMS.register("matchaboba",
             () -> new MatchaBoba(new Item.Properties().stacksTo(1)));
 

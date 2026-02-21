@@ -8,7 +8,7 @@ public class ScytheModel extends GeoModel<ScytheItem> { // Change this to GeoMod
 
     @Override
     public ResourceLocation getModelResource(ScytheItem animatable) {
-        return ResourceLocation.fromNamespaceAndPath(RedPandaMod.MODID, "geckolib/models/scythe.geo.json");
+        return ResourceLocation.fromNamespaceAndPath(RedPandaMod.MODID, "geo/scythe.geo.json");
     }
 
     @Override
@@ -18,6 +18,6 @@ public class ScytheModel extends GeoModel<ScytheItem> { // Change this to GeoMod
 
     @Override
     public ResourceLocation getAnimationResource(ScytheItem animatable) {
-        return ResourceLocation.fromNamespaceAndPath(RedPandaMod.MODID, "geckolib/animations/scythe.animation.json");
+        return ResourceLocation.fromNamespaceAndPath(RedPandaMod.MODID, "animations/scythe.animation.json");
     }
 }

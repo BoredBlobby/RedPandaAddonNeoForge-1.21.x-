@@ -18,6 +18,7 @@ public class ModSounds {
     public static final Supplier<SoundEvent> GFBOBA = registerSoundEvent("gfboba");
     public static final Supplier<SoundEvent> GFACCEPT = registerSoundEvent("gfaccept");
     public static final Supplier<SoundEvent> GFREJECT = registerSoundEvent("gfreject");
+    public static final Supplier<SoundEvent> WHOOSH = registerSoundEvent("whoosh");
 
 
     private static Supplier<SoundEvent> registerSoundEvent(String name) {

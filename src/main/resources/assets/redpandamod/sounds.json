@@ -22,5 +22,11 @@
     "sounds": [
       "redpandamod:gfreject"
     ]
+  },
+  "whoosh": {
+    "subtitle": "sounds.redpandamod.whoosh",
+    "sounds": [
+      "redpandamod:gfreject"
+    ]
   }
 }
